@@ -15,7 +15,7 @@
         
     <div class="container">
         <div class="row"><h1>Demo (File Upload)</h1></div>
-        <div class="row">
+        <div class="row" style="margin-bottom: 50px;">
             <div class="col-sm-4"><input type="file" id="tFile" /></div>
             <div class="col-sm-4" id="fileContainer"></div>
         </div>
@@ -37,7 +37,7 @@
     <script>
 
         var info = {
-            url: '/demo/upload',
+            url: '/v1beta1/file/uploads',
             // isUploadMultipleFiles: 'false',
             // filesListParentElement: document.getElementById('fileContainer'),
             formParams: {name: '0'},
@@ -56,9 +56,9 @@
         $('#tFile').uploadFiles(info);
 
         var info1 = {
-            url: '/demo/upload',
+            url: '/v1beta1/file/upload',
             // isUploadMultipleFiles: 'false',
-            // filesListParentElement: document.getElementById('fileContainer1'),
+            filesListParentElement: document.getElementById('fileContainer1'),
             formParams: {name: '0'}
         };
 

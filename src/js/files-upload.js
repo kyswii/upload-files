@@ -104,27 +104,16 @@
         $(this).css('display', 'none');   
 
         $(this).after(
-            '<div class="file-upload">'
-                + '<div class="row">'
-                    + '<button role="fileChoose" type="button" class="btn btn-info">'
-                        + this.fileUploadBtnText
-                    + '</button>'
-                + '</div>'
-            + '</div>'
+            '<div role="fileChoose" class="file-choose-btn"><span class="glyphicon glyphicon-file"></span>&nbsp;' + this.fileUploadBtnText + '</div>'
         );
 
         if (!this.filesListParentElement) {
             var ele = document.createElement('div');
-            // ele.id = 'filesUploadSituation';
             ele.className = 'files-upload-situation-div';
             document.body.appendChild(ele);
 
             this.filesListParentElement = ele;
 
-            if ($('body').hasClass('.files-upload-situation-div')) {
-                var le = $('body').find('.files-upload-situation-div')
-                this.filesListParentElement
-            }
         }
 
         $(this.filesListParentElement).append('<div class="files-upload-situation"></div>');
@@ -134,7 +123,7 @@
         //
         var fileActionsHtml = '';
         if (this.isUploadMultipleFiles == 'true') {
-            fileActionsHtml += '<a href="javascript:;" class="files-action-group-item" role="uploadSubmit">Upload</a>'
+            fileActionsHtml += '<a href="javascript:;" class="files-action-group-item" role="uploadSubmit"><span class="glyphicon glyphicon-cloud-upload"></span>&nbsp;Upload</a>'
         }
         
         this.$filesListElement.append('<div class="files-action-group">' 
@@ -143,7 +132,7 @@
                         + '</div>'
                         + '<div class="files-action-group-div">' 
                             + fileActionsHtml
-                            + '<a href="javascript:;" class="files-action-group-item" role="uploadAbort">Abort</a>'
+                            + '<a href="javascript:;" class="files-action-group-item" role="uploadAbort"><span class="glyphicon glyphicon-minus-sign"></span>&nbsp;Abort</a>'
                         + '</div>'
                     + '</div>');
 
@@ -170,7 +159,7 @@
             }
         });
 
-        $(this).next('.file-upload').find('button[role=fileChoose]').click(function () {
+        $(this).next('.file-choose-btn').click(function () {
             $(that).trigger('click');
         });
 
@@ -247,7 +236,10 @@
 
         this.$filesListElement.append(
             '<div class="progress-info" id="progressInfo' + key + '" role="' + key + '">'
-                + '<div class="file-remove-div"><div class="file-remove">+</div></div>'
+                + '<div class="progress-info-head">'
+                    + '<div class="file-upload-status"></div>'
+                    + '<div class="file-remove-div"><div class="file-remove"><span class="glyphicon glyphicon-trash"></span></div></div>'
+                + '</div>'
                 + '<div class="progress-info-title">'
                     + '<p class="file-name"><span style="color: #D579E8; font-weight: bold; font-size: 14px;">#</span>&nbsp;' + name + '</p>'
                     + '<p class="file-upload-info">Percent: <span id="percent' + key + '">0</span>&nbsp;&nbsp;Rate: <span id="rate' + key + '">0</span></p>'
@@ -322,9 +314,6 @@
             contentType: false,
             xhr: function() {
 
-                // var xhr = window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
-                //         new window.XMLHttpRequest : new window.ActiveXObject('Microsoft.XMLHTTP');
-
                 var xhr = $.ajaxSettings.xhr();
 
                 console.log('xhr....', xhr);
@@ -357,6 +346,9 @@
 
                 that.$filesListElement.find('#progressBar' + fileKey).addClass('file-upload-success');
                 that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').addClass('progress-file-upload-success');
+                that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').find('.file-upload-status').html(
+                    '<span class="glyphicon glyphicon-ok" style="color: #93EFFF;"></span>'
+                );
                 setTimeout(function () {
                     that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').slideUp(1000, function () {
                         $(this).remove();
@@ -376,7 +368,10 @@
             error: function (err) {
                 var dir = that.allFiles[fileKey].dir;
                 if (!that.uploadFilesCancle) {
-                    that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').css('background', 'rgba(255,126,160,0.4)');
+                    that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').addClass('progress-file-upload-error');
+                    that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').find('.file-upload-status').html(
+                        '<span class="glyphicon glyphicon-remove" style="color: #F47775;"></span>'
+                    );
                 }
 
                 that.onUploadFileError(err, dir);
@@ -433,17 +428,6 @@
 
         }, false);
     }
-
-// xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
-//  function() {
-//  return new window.XMLHttpRequest();
-//  } :
-//  function() {
-//  try {
-//  return new window.ActiveXObject("Microsoft.XMLHTTP");
-//  } catch(e) {}
-//  }
-
 
 
 }(jQuery));

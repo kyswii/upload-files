@@ -38,8 +38,8 @@ gulp.task('serve', ['copy'], function () {
         livereload: true,
         middleware: function (connect, options) {
 
-            var p1 = proxy('/demo', {
-                target: "http://13.13.13.82:8080/",
+            var p1 = proxy('/v1beta1', {
+                target: "http://localhost:10010/",
             });
 
             return [p1];
