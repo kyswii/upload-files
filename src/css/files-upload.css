@@ -27,7 +27,7 @@
     border-radius: 8px;
     padding: 15px;
     margin-bottom: 20px;
-    background: rgba(229,210,239,1);
+    background: rgba(229,210,239,.5);
 
 }
 
@@ -82,7 +82,11 @@
     background: #E8657A;
 }
 
-#filesUploadSituation {
+.progress-file-upload-success {
+    background: rgba(229,210,239,.8);
+}
+
+.files-upload-situation-div {
     z-index: 1000;
     position: fixed;
     
@@ -101,7 +105,7 @@
     overflow-x: hidden;
     overflow-y: auto;
 
-    background: rgba(200,200,200,.2); 
+    background: rgba(200,200,200,.4); 
 }
 
 .files-upload-situation {
@@ -110,7 +114,7 @@
 }
 
 .files-upload-situation .files-action-group {
-    
+    padding-bottom: 5px;
 }
 
 .files-upload-situation .files-action-group .all-files-remove-div {

@@ -32,11 +32,11 @@
          * @param {function} params.onUploadFileSuccess - callback
          * @param {function} params.onUploadFileError - callback
          * @param {function} params.onUploadEnd - callback
+         * @param {function} params.onUploadAbort - callback
          * 
          */
 
-
-        this.url = params.url; // Required
+        this.url = params.url; 
 
         this.fileUploadBtnText = params.fileUploadBtnText || 'Choose File';
 
@@ -63,6 +63,8 @@
 
         this.uploadInterrupted = false;
 
+        this.currentAjax = null;
+
         //
         this.isUploadMultipleFiles = params.isUploadMultipleFiles || 'true';
 
@@ -80,23 +82,27 @@
         this.onProgress = onProgress;
 
         // callback
-        this.onUploadFileSuccess = params.onUploadFileSuccess || function (dir) {};
+        this.onUploadFileSuccess = params.onUploadFileSuccess || function (result) {};
 
-        this.onUploadFileError = params.onUploadFileError || function (dir) {};
+        this.onUploadFileError = params.onUploadFileError || function (err, dir) {};
 
-        this.onUploadEnd = params.onUploadEnd || function () { };
+        this.onUploadEnd = params.onUploadEnd || function (e) { };
+
+        this.onUploadAbort = params.onUploadAbort || function (files) {};
 
         // 
         this.render();       
     }
 
+    //
     function render(callback) {
 
         console.log('this...', this);
 
         var that = this;
 
-        $(this).css('display', 'none');                
+        $(this).css('display', 'none');   
+
         $(this).after(
             '<div class="file-upload">'
                 + '<div class="row">'
@@ -109,10 +115,16 @@
 
         if (!this.filesListParentElement) {
             var ele = document.createElement('div');
-            ele.id = 'filesUploadSituation';
+            // ele.id = 'filesUploadSituation';
+            ele.className = 'files-upload-situation-div';
             document.body.appendChild(ele);
 
             this.filesListParentElement = ele;
+
+            if ($('body').hasClass('.files-upload-situation-div')) {
+                var le = $('body').find('.files-upload-situation-div')
+                this.filesListParentElement
+            }
         }
 
         $(this.filesListParentElement).append('<div class="files-upload-situation"></div>');
@@ -131,7 +143,7 @@
                         + '</div>'
                         + '<div class="files-action-group-div">' 
                             + fileActionsHtml
-                            + '<a href="javascript:;" class="files-action-group-item" role="uploadCancle">Cancle</a>'
+                            + '<a href="javascript:;" class="files-action-group-item" role="uploadAbort">Abort</a>'
                         + '</div>'
                     + '</div>');
 
@@ -139,6 +151,7 @@
         this.actions();                
     }
 
+    //
     function actions() {
         var that = this;
         var element = this.filesListParentElement;
@@ -196,10 +209,15 @@
         var $actionNodes = this.$filesListElement.find('.files-action-group-item');
 
         $actionNodes.click(function () {
-            if ($(this).attr('role') == 'uploadCancle') {
-                that.uploadFilesCancle = true;
+            if ($(this).attr('role') == 'uploadAbort') {
+                that.uploadFilesCancle = true;        
 
-                that.abortUpload();
+                console.log('currentAjax..', that.currentAjax);
+                if (that.currentAjax) {
+                    that.currentAjax.abort();
+
+                    that.onUploadAbort(that.allFiles);
+                }
             }
 
             if ($(this).attr('role') == 'uploadSubmit') {
@@ -219,6 +237,7 @@
         
     }
 
+    //
     function showFileInfo(name) {
         var that = this;
 
@@ -241,7 +260,7 @@
             $(element).animate({marginTop: '-350px'}, 500);
         }
 
-        $('#progressInfo' + key).fadeIn(500);
+        this.$filesListElement.find('#progressInfo' + key).fadeIn(500);
 
         this.$filesListElement.find('.file-remove').click(function () {
             var key = $(this).closest('.progress-info').attr('role');
@@ -267,6 +286,7 @@
         this.fileKey++;
     }
 
+    //
     function uploadFiles() {
         this.uploadFormDatas = [];
         var url = this.url;
@@ -286,7 +306,7 @@
 
         if (!this.uploadFormDatas[index]) {
 
-            this.onUploadEnd();
+            this.onUploadEnd(this);
             return ;
         }
 
@@ -294,14 +314,20 @@
 
         var formData = this.uploadFormDatas[index].formData;
 
-        $.ajax(url, {
+        this.currentAjax = $.ajax(url, {
             type: 'POST',
             cache: false,
             data: formData,
             processData: false,
             contentType: false,
             xhr: function() {
+
+                // var xhr = window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
+                //         new window.XMLHttpRequest : new window.ActiveXObject('Microsoft.XMLHTTP');
+
                 var xhr = $.ajaxSettings.xhr();
+
+                console.log('xhr....', xhr);
 
                 that.onProgress(xhr, url, index, fileKey);   
                 
@@ -309,15 +335,11 @@
                     console.log('end...');        
 
                     if (that.uploadFilesCancle || that.uploadInterrupted) {
-                        return ;
+                        return xhr;
                     }
 
                     that.toUploadFile(url, index + 1);
                 }
-
-                that.abortUpload = xhr.abort;
-
-                console.log('upload..', that.abortUpload);
                 
                 return xhr;
             },
@@ -334,6 +356,7 @@
                 delete that.allFiles[fileKey];
 
                 that.$filesListElement.find('#progressBar' + fileKey).addClass('file-upload-success');
+                that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').addClass('progress-file-upload-success');
                 setTimeout(function () {
                     that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').slideUp(1000, function () {
                         $(this).remove();
@@ -352,13 +375,17 @@
             },
             error: function (err) {
                 var dir = that.allFiles[fileKey].dir;
-                that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').css('background', 'rgba(255,126,160,0.4)');
-                that.onUploadFileError(dir);
+                if (!that.uploadFilesCancle) {
+                    that.$filesListElement.find('#progressBar' + fileKey).closest('.progress-info').css('background', 'rgba(255,126,160,0.4)');
+                }
+
+                that.onUploadFileError(err, dir);
             }
         });
         
     }
 
+    //
     function onProgress(xhr, url, index, fileKey) {
         var that = this;
         var progressIndex = index;
@@ -378,11 +405,13 @@
 
             if (timeStamp > 0) {
                 timeInterval = e.timeStamp - timeStamp;
+                console.log('next...', timeInterval);
             } else {
                 timeInterval = Date.now() - start;
+                console.log('first...', timeInterval);
             }
 
-            rate = (e.loaded - loaded) / 1024 / timeInterval * 1000;
+            rate = ((e.loaded - loaded) / (1024 * timeInterval)) * 1000;
 
             console.log('rate...', rate);
 
@@ -390,7 +419,7 @@
             if (rate >= 1024) {
                 rateStr = (rate/1024).toFixed(2) + 'M/S'
             } else {
-                rateStr = Math.ceil(rate) + 'KB/S' ;
+                rateStr = Math.round(rate) + 'KB/S' ;
             }
 
             timeStamp = e.timeStamp;
@@ -404,5 +433,17 @@
 
         }, false);
     }
+
+// xhr: window.XMLHttpRequest && (window.location.protocol !== "file:" || !window.ActiveXObject) ?
+//  function() {
+//  return new window.XMLHttpRequest();
+//  } :
+//  function() {
+//  try {
+//  return new window.ActiveXObject("Microsoft.XMLHTTP");
+//  } catch(e) {}
+//  }
+
+
 
 }(jQuery));

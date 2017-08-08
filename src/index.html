@@ -19,6 +19,10 @@
             <div class="col-sm-4"><input type="file" id="tFile" /></div>
             <div class="col-sm-4" id="fileContainer"></div>
         </div>
+         <div class="row">
+            <div class="col-sm-4"><input type="file" id="iFile" /></div>
+            <div class="col-sm-4" id="fileContainer1"></div>
+        </div> 
     </div>
 
     <!-- thirdparty -->
@@ -35,12 +39,31 @@
         var info = {
             url: '/demo/upload',
             // isUploadMultipleFiles: 'false',
-            filesListParentElement: document.getElementById('fileContainer'),
-            formParams: {name: '0'}
+            // filesListParentElement: document.getElementById('fileContainer'),
+            formParams: {name: '0'},
+            onUploadFileSuccess: function (result) {
+                console.log('result...', result);
+            },
+            onUploadEnd: function (e) {
+                console.log('end.....', e);
+            },
+            onUploadAbort: function (files) {
+                console.log('file....', files);
+            }
         };
 
 
         $('#tFile').uploadFiles(info);
+
+        var info1 = {
+            url: '/demo/upload',
+            // isUploadMultipleFiles: 'false',
+            // filesListParentElement: document.getElementById('fileContainer1'),
+            formParams: {name: '0'}
+        };
+
+
+        $('#iFile').uploadFiles(info1);
 
     </script>
 
