@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "gulp serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +16,12 @@
   "bugs": {
     "url": "https://github.com/kyswii/upload-files/issues"
   },
-  "homepage": "https://github.com/kyswii/upload-files#readme"
+  "homepage": "https://github.com/kyswii/upload-files#readme",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
+    "gulp-connect": "^5.0.0",
+    "gulp-sass": "^3.1.0",
+    "http-proxy-middleware": "^0.17.4"
+  }
 }
