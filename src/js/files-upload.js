@@ -413,6 +413,8 @@
             var rateStr = '';
             if (rate >= 1024) {
                 rateStr = (rate/1024).toFixed(2) + 'M/S'
+            } else if (rate < 1) {
+                rateStr = Math.round(rate * 1024) + 'B/S';
             } else {
                 rateStr = Math.round(rate) + 'KB/S' ;
             }
