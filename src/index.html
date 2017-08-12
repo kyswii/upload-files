@@ -40,7 +40,8 @@
             url: '/v1beta1/file/uploads',
             // isUploadMultipleFiles: 'false',
             // filesListParentElement: document.getElementById('fileContainer'),
-            formParams: {name: '0'},
+            fileUploadBtnText: 'Choose Files0',
+            formData: {name: '0'},
             onUploadFileSuccess: function (result) {
                 console.log('result...', result);
             },
@@ -54,12 +55,16 @@
 
 
         $('#tFile').uploadFiles(info);
+        
+
+        $('#tFile').uploadFiles('settings', {formData: {content: 'content'}});
 
         var info1 = {
             url: '/v1beta1/file/upload',
             // isUploadMultipleFiles: 'false',
+            fileUploadBtnText: 'Choose Files1',
             filesListParentElement: document.getElementById('fileContainer1'),
-            formParams: {name: '0'}
+            formData: {name: '0'}
         };
 
 

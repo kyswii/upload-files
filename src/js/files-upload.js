@@ -4,11 +4,6 @@
      * Dependent package(jQuery & bootstrap)
      */
 
-
-    $.fn.extend({
-        uploadFiles: UploadFiles,
-    });
-
     function isEmptyObject(obj) {
         var i = 0;
         for (var item in obj) {
@@ -20,84 +15,108 @@
         return false;
     }
 
-    function UploadFiles(params) {
+    var methods = {
+        init: function (params) {
+            /**
+             * UploadFiles the project to an params.
+             * @param {string} params.url - required
+             * @param {string} params.fileUploadBtnText - 
+             * @param {string} params.filesListParentElement - 
+             * @param {object} params.formData - 
+             * @param {string} params.isUploadMultipleFiles - 
+             * @param {function} params.onUploadFileSuccess - callback
+             * @param {function} params.onUploadFileError - callback
+             * @param {function} params.onUploadEnd - callback
+             * @param {function} params.onUploadAbort - callback
+             * 
+             */
 
-        /**
-         * UploadFiles the project to an params.
-         * @param {string} params.url - required
-         * @param {string} params.fileUploadBtnText - 
-         * @param {string} params.filesListParentElement - 
-         * @param {object} params.formParams - 
-         * @param {string} params.isUploadMultipleFiles - 
-         * @param {function} params.onUploadFileSuccess - callback
-         * @param {function} params.onUploadFileError - callback
-         * @param {function} params.onUploadEnd - callback
-         * @param {function} params.onUploadAbort - callback
-         * 
-         */
+            return this.each(function () {
+                this.url = params.url; 
 
-        this.url = params.url; 
+                this.fileUploadBtnText = params.fileUploadBtnText || 'Choose File';
 
-        this.fileUploadBtnText = params.fileUploadBtnText || 'Choose File';
+                this.filesListParentElement = params.filesListParentElement;
 
-        this.filesListParentElement = params.filesListParentElement;
+                this.$filesListElement = null;
 
-        this.$filesListElement = null;
+                this.isCreateFilesListNode = params.filesListParentElement ? false : true;
 
-        this.isCreateFilesListNode = params.filesListParentElement ? false : true;
+                this.formData = params.formData || {};
+                //
 
-        this.formParams = params.formParams || {};
-        //
+                this.allFiles = {};
 
-        this.allFiles = {};
+                this.dirs = {};
+                
+                this.uploadFormDatas = [];
 
-        this.dirs = {};
-        
-        this.uploadFormDatas = [];
+                this.fileKey = 0;
 
-        this.fileKey = 0;
+                this.uploadFilesCancle = false;
 
-        this.uploadFilesCancle = false;
+                this.abortUpload = function () { };
 
-        this.abortUpload = function () { };
+                this.uploadInterrupted = false;
 
-        this.uploadInterrupted = false;
+                this.currentAjax = null;
 
-        this.currentAjax = null;
+                //
+                this.isUploadMultipleFiles = params.isUploadMultipleFiles || 'true';
 
-        //
-        this.isUploadMultipleFiles = params.isUploadMultipleFiles || 'true';
+                // methods
+                this.render = render;
 
-        // methods
-        this.render = render;
+                this.actions = actions;
 
-        this.actions = actions;
+                this.showFileInfo = showFileInfo;
 
-        this.showFileInfo = showFileInfo;
+                this.uploadFiles = uploadFiles;
 
-        this.uploadFiles = uploadFiles;
+                this.toUploadFile = toUploadFile;
 
-        this.toUploadFile = toUploadFile;
+                this.onProgress = onProgress;
 
-        this.onProgress = onProgress;
+                // callback
+                this.onUploadFileSuccess = params.onUploadFileSuccess || function (result) {};
 
-        // callback
-        this.onUploadFileSuccess = params.onUploadFileSuccess || function (result) {};
+                this.onUploadFileError = params.onUploadFileError || function (err, dir) {};
 
-        this.onUploadFileError = params.onUploadFileError || function (err, dir) {};
+                this.onUploadEnd = params.onUploadEnd || function (e) { };
 
-        this.onUploadEnd = params.onUploadEnd || function (e) { };
+                this.onUploadAbort = params.onUploadAbort || function (files) {};
 
-        this.onUploadAbort = params.onUploadAbort || function (files) {};
+                // 
+                this.render();       
+            })
+        },
 
-        // 
-        this.render();       
+        settings: function (params) {
+
+            return this.each(function () {
+
+                for (var item in params) {
+                    if (item in this) {
+                        this[item] = params[item];
+                    }
+                }   
+            });  
+        }
+    }
+
+    function UploadFiles(method) {
+
+        if (methods[method]) {
+            return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+        } else if (typeof method === 'object') {
+            return methods.init.apply(this, arguments);
+        } else {
+            $.error('Method' + method + 'does not exist on jQuery.uploadFiles');
+        }     
     }
 
     //
     function render(callback) {
-
-        console.log('this...', this);
 
         var that = this;
 
@@ -167,8 +186,8 @@
             var formData = new FormData();
             formData.append('file', $(this)[0].files[0]);
 
-            for (var item in that.formParams) {
-                formData.append(item, that.formParams[item]);
+            for (var item in that.formData) {
+                formData.append(item, that.formData[item]);
             }
 
             var name = $(this)[0].files[0].name;
@@ -430,6 +449,11 @@
 
         }, false);
     }
+
+
+    $.fn.extend({
+        uploadFiles: UploadFiles,
+    });
 
 
 }(jQuery));
