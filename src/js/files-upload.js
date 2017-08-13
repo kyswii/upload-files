@@ -259,7 +259,7 @@
                     + '<div class="file-upload-status"></div>'
                     + '<div class="file-remove-div"><div class="file-remove"><span class="glyphicon glyphicon-trash"></span></div></div>'
                 + '</div>'
-                + '<div class="progress-info-title">'
+                + '<div class="progress-info-body">'
                     + '<p class="file-name"><span style="color: #D579E8; font-weight: bold; font-size: 14px;">#</span>&nbsp;' + name + '</p>'
                     + '<p class="file-upload-info">Percent: <span id="percent' + key + '">0</span>&nbsp;&nbsp;Rate: <span id="rate' + key + '">0</span></p>'
                 + '</div>'
